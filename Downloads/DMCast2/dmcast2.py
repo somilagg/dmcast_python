@@ -1,48 +1,60 @@
 import numpy as np
+import datetime
 
 class wthr_t(object):
-    temp = np.empty([1, 24])
-    rh = np.empty([1, 24])
-    wet = np.empty([1, 24])
-    rainfall = np.empty([1, 24])
-    wetcnt = np.empty([1, 24])
-    wetmins = np.empty([1, 24])
-    wettemps = np.empty([1, 24])
-    dd7 = 0.0
-    dlyrain = 0.0
-    dlytemp = 0.0
-    ok = np.empty([1, 24])
+
+    def __init__(self):
+        #self.temp = np.empty([1, 24], dtype='datetime.time')
+        self.temp = [datetime.time.min] * 8784
+        self.rh = [datetime.time.min] * 8784
+        self.wet = [datetime.time.min] * 8784
+        self.rainfall = [datetime.time.min] * 8784
+        self.wetcnt = np.empty([1, 24])
+        self.wetmins = np.empty([1, 24])
+        self.wettemps = np.empty([1, 24])
+        self.dd7 = 0.0
+        self.dlyrain = 0.0
+        self.dlytemp = 0.0
+        self.ok = [False] * 8784 
 
 class cultivar_t(object):
-    els = np.empty([1, 367])
-    rincb = np.empty([367, 24])
-    sincb = np.empty([367, 24])
-    els12 = 0.0
-    primary_inf = 0.0
-    incubation = 0.0
-    dmwarns = 0.0
+
+    def __init__(self):
+        els = np.empty([1, 367])
+        rincb = np.empty([367, 24])
+        sincb = np.empty([367, 24])
+        els12 = 0.0
+        primary_inf = 0.0
+        incubation = 0.0
+        dmwarns = 0.0
 
 class model_t(object):
-    sp = np.empty([1, 24])
-    sv = np.empty([1, 24])
-    dmrisk = np.empty([1, 24])
-    isprd = np.empty([1, 24])
-    istmp = np.empty([1, 24])
-    spmort = np.empty([1, 24])
-    infect = np.empty([1, 24])
+
+    def __init__(self):
+        sp = np.empty([1, 24])
+        sv = np.empty([1, 24])
+        dmrisk = np.empty([1, 24])
+        isprd = np.empty([1, 24])
+        istmp = np.empty([1, 24])
+        spmort = np.empty([1, 24])
+        infect = np.empty([1, 24])
 
 class warning_t(object):
-    sday = 0
-    shour = 0
-    eday = 0
-    ehour = 0
-    duration = 0
-    dmrisk = 0.0
+
+    def __init__(self):
+        sday = 0
+        shour = 0
+        eday = 0
+        ehour = 0
+        duration = 0
+        dmrisk = 0.0
 
 class date(object):
-    da_year = 0
-    da_mon = 0
-    da_day = 0
+
+    def __init__(self):
+        da_year = 0
+        da_mon = 0
+        da_day = 0
 
 class dmcast2(object):
 
@@ -120,18 +132,18 @@ class dmcast2(object):
                         rincb = (1.0/y)/24.0
                     else:
                         rincb = 0.0
-                    c[0].rincb[day][hour] = rincb
-                c[0].sincb[day][hour] = c[0].sincb[day][hour-1] + c[0].rincb[day][hour]
+                    self.c[0].rincb[day][hour] = rincb
+                self.c[0].sincb[day][hour] = self.c[0].sincb[day][hour-1] + c[0].rincb[day][hour]
         sincb = 0
         for day in range(c[0].primary_inf, day_last+1):
             for hour in range(0, 24):
                 if (day==day_first and hour<hour_first) and (day==day_last and hour>hour_last):
                     break
-                c[0].rincb[day][hour] = c[0].rincb[day][hour]
-                sincb += c[0].rincb[day][hour]
-                c[0].sincb[day][hour] = sincb
+                self.c[0].rincb[day][hour] = self.c[0].rincb[day][hour]
+                sincb += self.c[0].rincb[day][hour]
+                self.c[0].sincb[day][hour] = sincb
                 if (sincb > 0.9999):
-                    c[0].incubation = day
+                    self.c[0].incubation = day
                     break
                 
     """
@@ -142,15 +154,21 @@ class dmcast2(object):
             ok[o] = False
 
         print(endIndex)
-        print(len(allDays))
         for index in range(0, endIndex+1):
             day = allDays[index]
-            hour = allHours[index]
-            w[day].temp[hour] = tmp[index]
-            w[day].rh[hour] = rh[index]
-            w[day].rainfall[hour] = prcp[index] 
-            w[day].wet[hour] = lwet[index] 
-            w[day].ok[hour] = ok[index]
+            float_hour = allHours[index]
+            print(len(allDays))
+            print(len(allHours))
+
+            hour = int(float_hour)
+
+            self.w.temp[hour] = tmp[index]
+            print(len(self.w.temp))
+            
+            self.w.rh[hour] = rh[index]
+            self.w.rainfall[hour] = prcp[index]
+            self.w.wet[hour] = lwet[index]
+            self.w.ok[hour] = ok[index]
 
         day_first = allDays[0]
         hour_first = allHours[0]

@@ -172,7 +172,6 @@ class general_dm(object):
 	 		self.smry_dict['statMsg'] = 'Insufficient data for model'
 			raise get_weather2.weatherError
 		(statFlg,self.dates,hours,days,tmp,rh,prcp,lwet,ok) = all_weather
-		print("before daylist length: " + str(len(days)))
 		if test :
 			oFile = open('test_weather.txt','w')
 			for index in range(len(self.dates)) :
@@ -189,7 +188,7 @@ class general_dm(object):
 				oFile.flush()
 			oFile.close()
 				
-
+		print("len ok: " + str(len(ok)))
 		if not self.isleapyear(self.eTime.year):
 			lastIndex = len(ok)  - 25
 		else :
@@ -200,31 +199,30 @@ class general_dm(object):
 		hourPtr = C.pointer(self.c_hours)
 
 		self.dayList = copy.copy(days)
-		print("dayList length: " + str(len(self.dayList)))
 
-		days = array.array('I',days)
-		self.c_days = YearIntArray(*days)
-		dayPtr = C.pointer(self.c_days)
+		# days = array.array('I',days)
+		# self.c_days = YearIntArray(*days)
+		# dayPtr = C.pointer(self.c_days)
 		
-		tmp = array.array('d',tmp)
-		self.c_tmp = YearDoubleArray(*tmp)
-		tmpPtr = C.pointer(self.c_tmp)
+		# tmp = array.array('d',tmp)
+		# self.c_tmp = YearDoubleArray(*tmp)
+		# tmpPtr = C.pointer(self.c_tmp)
 		
-		rh = array.array('d',rh)
-		self.c_rh = YearDoubleArray(*rh)
-		rhPtr = C.pointer(self.c_rh)
+		# rh = array.array('d',rh)
+		# self.c_rh = YearDoubleArray(*rh)
+		# rhPtr = C.pointer(self.c_rh)
 
-		prcp = array.array('d',prcp)
-		self.c_prcp = YearDoubleArray(*prcp)
-		prcpPtr = C.pointer(self.c_prcp)
+		# prcp = array.array('d',prcp)
+		# self.c_prcp = YearDoubleArray(*prcp)
+		# prcpPtr = C.pointer(self.c_prcp)
 
-		lwet = array.array('d',lwet)
-		self.c_lwet = YearDoubleArray(*lwet)
-		lwetPtr = C.pointer(self.c_lwet)
+		# lwet = array.array('d',lwet)
+		# self.c_lwet = YearDoubleArray(*lwet)
+		# lwetPtr = C.pointer(self.c_lwet)
 
-		ok = array.array('d',ok)
-		self.c_ok = YearDoubleArray(* ok)
-		okPtr = C.pointer(self.c_ok)
+		# ok = array.array('d',ok)
+		# self.c_ok = YearDoubleArray(* ok)
+		# okPtr = C.pointer(self.c_ok)
 
 		#retCode = _dmC.setup_dm()
 		obj = dmcast2.dmcast2()

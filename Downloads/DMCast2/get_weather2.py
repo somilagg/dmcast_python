@@ -532,7 +532,10 @@ class general_dm_weather(object) :
 							fixed = fixed + 1
 		self.dates_times = self.dates_times + var
 		self.dates = self.dates + dates
+		#print("dates: " + str(len(dates)))
+		#print("self.dates: " + str(len(self.dates)))
 		self.tmp_vals = self.tmp_vals + values
+		#print("self.tmp_vals: " + str(len(self.tmp_vals)))
 		self.tmp_flgs = self.tmp_flgs + flags
 
 
@@ -717,17 +720,24 @@ class general_dm_weather(object) :
 	
 	def get_mildew_missing(self) :
 		last_date = self.dates_times[len(self.dates)-1]
+
 		delta = timedelta(hours=1)
 		sTime = last_date + delta
 		eTime = DateTime.DateTime(sTime.year+1,1,1,0)
 		missing_hours = []
 		missing_days = []
 
+		prev = sTime.day
+		missing_days.append(prev)
+		counter = 0
 		while sTime < eTime :
-			#localTime =  getLocalFromEST_time(sTime) 
-			missing_days.append(sTime.day)
+			#localTime =  getLocalFromEST_time(sTime)
+			if prev != sTime.day:
+				missing_days.append(sTime.day)
+				prev = sTime.day
 			missing_hours.append(sTime.hour)
 			sTime = sTime + delta
+
 		return (missing_days,missing_hours)
 
 
@@ -739,11 +749,6 @@ class general_dm_weather(object) :
 			print 'length problem',len(self.dates),len(self.tmp_vals),len(self.rh_vals),len(self.prcp_vals),len(self.lwet_vals)
 			return [0]
 
-		#---------------------------------------#
-		# ISSUE IS HERE
-		# - len(self.dates) = 0, self.dates 
-		#   has not been populated
-		#---------------------------------------#
 		days = np.empty([1, len(self.dates)]).ravel()
 		hours = [0,]*len(self.dates)
 		yearOfHours = 24*366
@@ -783,8 +788,9 @@ class general_dm_weather(object) :
 		prcp = self.prcp_vals + missing_list
 		lwet = self.lwet_vals + missing_list
 		if (len(self.dates) != 0):
-			(missing_days,missing_hours) = self.get_mildew_missing()	
-			days = days + missing_days
+			(missing_days,missing_hours) = self.get_mildew_missing()
+	
+			np.append(days, missing_days)
 			hours = hours + missing_hours
 		return (self.statFlg,self.dates,hours,days,tmp,rh,prcp,lwet,ok)
 
