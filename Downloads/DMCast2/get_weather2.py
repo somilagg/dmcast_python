@@ -532,10 +532,7 @@ class general_dm_weather(object) :
 							fixed = fixed + 1
 		self.dates_times = self.dates_times + var
 		self.dates = self.dates + dates
-		#print("dates: " + str(len(dates)))
-		#print("self.dates: " + str(len(self.dates)))
 		self.tmp_vals = self.tmp_vals + values
-		#print("self.tmp_vals: " + str(len(self.tmp_vals)))
 		self.tmp_flgs = self.tmp_flgs + flags
 
 
@@ -752,7 +749,10 @@ class general_dm_weather(object) :
 		days = np.empty([1, len(self.dates)]).ravel()
 		hours = [0,]*len(self.dates)
 		yearOfHours = 24*366
-		ok = [0,]*yearOfHours
+#---------------------
+# THIS IS WHERE IT GETS LONG
+#---------------------
+		ok = [0,]*len(self.dates)
 		for index in range(len(self.dates)) :
 			try :
 				this_date = self.dates_times[index]
@@ -784,6 +784,7 @@ class general_dm_weather(object) :
 		diffNum = len(ok) - len(self.dates)
 		missing_list = [-999.0,]*diffNum
 		tmp = self.tmp_vals + missing_list
+		#print('type of missing list', type(missing_list[0]))
 		rh = self.rh_vals + missing_list
 		prcp = self.prcp_vals + missing_list
 		lwet = self.lwet_vals + missing_list

@@ -15,6 +15,7 @@ import get_weather2
 from datetime import timedelta
 from datetime import datetime
 from pytz import timezone
+import dm_cultivars
 import numpy as np
 
 
@@ -96,6 +97,9 @@ class general_dm(object):
 		self.pending_day = None
 		self.wet_threshold = 0.1666
 		self.missing = -999.0
+		self.obj = None
+		self.cWeather = None
+		self.retCode = None
 
 
 	def run_dm(self) :
@@ -160,10 +164,10 @@ class general_dm(object):
 		# weather array setup
 		# -----------------------------------
 		yearOfHours = 366*24
-		intPtr = C.POINTER(C.c_int*yearOfHours)
-		doublePtr = C.POINTER(C.c_double*yearOfHours)
-		YearIntArray = C.c_int*yearOfHours
-		YearDoubleArray = C.c_double*yearOfHours
+		#intPtr = C.POINTER(C.c_int*yearOfHours)
+		#doublePtr = C.POINTER(C.c_double*yearOfHours)
+		#YearIntArray = C.c_int*yearOfHours
+		#YearDoubleArray = C.c_double*yearOfHours
 		#sister = self.smry_dict['sister']
 
 
@@ -194,9 +198,9 @@ class general_dm(object):
 		else :
 			lastIndex = len(ok) - 1
 
-		hours = array.array('I',hours)
-		self.c_hours = YearIntArray(*hours)
-		hourPtr = C.pointer(self.c_hours)
+		#hours = array.array('I',hours)
+		#self.c_hours = YearIntArray(*hours)
+		#hourPtr = C.pointer(self.c_hours)
 
 		self.dayList = copy.copy(days)
 
@@ -225,13 +229,13 @@ class general_dm(object):
 		# okPtr = C.pointer(self.c_ok)
 
 		#retCode = _dmC.setup_dm()
-		obj = dmcast2.dmcast2()
+		self.obj = dmcast2.dmcast2()
 
 		#cWeather = _dmC.read_weatherdata
-		cWeather = obj.read_weatherdata(lastIndex, days, hours, tmp, rh, prcp, lwet, ok)
+		self.cWeather = self.obj.read_weatherdata(lastIndex, days, hours, tmp, rh, prcp, lwet, ok)
 		#cWeather.argtypes = [C.c_int,intPtr,intPtr,doublePtr,doublePtr,doublePtr,doublePtr,doublePtr]
 		#retCode = cWeather(lastIndex,dayPtr,hourPtr,tmpPtr,rhPtr,prcpPtr,lwetPtr,okPtr)
-		retCode =  retCode.process_weatherdata()
+		self.retCode =  self.obj.process_weatherdata()
 		
 		
 		
@@ -243,11 +247,11 @@ class general_dm(object):
 		k = info['k']
 		m = info['m']
 
-		cult = _dmC.grape_phenology
-		cult.argtypes = [C.c_double,C.c_double,C.c_double,C.c_double]
-		retCode = cult(A,B,k,m)
-		retCode = _dmC.primary_infection()
-		retCode = _dmC.incubation_period()
+		cult = self.obj.grape_phenology
+		#cult.argtypes = [C.c_double,C.c_double,C.c_double,C.c_double]
+		#retCode = cult(A,B,k,m)
+		retCode = self.obj.primary_infection()
+		retCode = self.obj.incubation_period()
 
 
 

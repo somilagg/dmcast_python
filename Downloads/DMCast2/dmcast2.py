@@ -5,7 +5,7 @@ class wthr_t(object):
 
     def __init__(self):
         #self.temp = np.empty([1, 24], dtype='datetime.time')
-        self.temp = [datetime.time.min] * 8784
+        self.temp = [0.0] * 24 
         self.rh = [datetime.time.min] * 8784
         self.wet = [datetime.time.min] * 8784
         self.rainfall = [datetime.time.min] * 8784
@@ -103,7 +103,7 @@ class dmcast2(object):
         Dday7 = 0.0
 
         for day in range(1, day_last):
-            Dday7 = w[day].dd7
+            Dday7 = self.w.dd7
             c[0].els[day] = A * (1 + exp(B-k*Dday7)) ** (1.0/(1.0-m))
             if c[0].els[day] >= 12 and c[0].els12 == 0:
                 c[0].els12 = day 
@@ -112,21 +112,21 @@ class dmcast2(object):
 
     def primary_infection(self):
 
-        for day in range (0, day_last):
-            if c[0].els[day] >= 12 and w[day].dlyrain > 2.54 and w[day.dlytemp] > 11.1:
-                c[0].primary_inf = day 
+        for day in range (0, self.day_last):
+            if self.c[0].els[day] >= 12 and self.w.dlyrain > 2.54 and w[day.dlytemp] > 11.1:
+                self.c[0].primary_inf = day 
                 break
 
     def incubation_period(self):
         x = 0.0
         y = 0.0
 
-        for day in range(day_first, day_last+1):
+        for day in range(self.day_first, self.day_last+1):
             for hour in range(0, 24):
-                if (day == day_first and hour < hour_first) or (day == day_last and hour > hour_last):
+                if (day == self.day_first and hour < self.hour_first) or (day == self.day_last and hour > self.hour_last):
                     continue
-                if w[day].temp[hour] > 8.0 and w[day].temp[hour] < 35.0:
-                    x = w[day].temp[hour]
+                if self.w.temp[hour] > 8.0 and self.w.temp[hour] < 35.0:
+                    x = self.w.temp[hour]
                     y = 41.961 - 3.5794 * x + 0.09803 * x * x - 0.0005341 * x * x * x
                     if y > 0:
                         rincb = (1.0/y)/24.0
@@ -153,18 +153,15 @@ class dmcast2(object):
         for o in range(len(ok)):
             ok[o] = False
 
-        print(endIndex)
         for index in range(0, endIndex+1):
             day = allDays[index]
             float_hour = allHours[index]
-            print(len(allDays))
-            print(len(allHours))
 
             hour = int(float_hour)
 
             self.w.temp[hour] = tmp[index]
-            print(len(self.w.temp))
-            
+            print(type(tmp[index]))
+
             self.w.rh[hour] = rh[index]
             self.w.rainfall[hour] = prcp[index]
             self.w.wet[hour] = lwet[index]
@@ -183,35 +180,35 @@ class dmcast2(object):
         dd7 = 0.0
         wetcnt = 0.0
 
-        for day in range(day_first, day_last+1):
+        for day in range(self.day_first, self.day_last+1):
             tmax=0
             cnt=0
-            w[day].dlyrain = 0
-            w[day].dlytemp = 0
+            self.w.dlyrain = 0
+            self.w.dlytemp = 0
 
             for hour in range(0, 24):
-                if (day==day_first and hour < hour_first) or (day==day_last and hour > hour_last) or (w[day].ok[hour] != True):
+                if (day==self.day_first and hour < self.hour_first) or (day==self.day_last and hour > self.hour_last) or (self.w.ok[hour] != True):
                     continue
-                if w[day].wet[hour] > 0.1666:
+                if self.w.wet[hour] > 0.1666:
                     wetcnt += 1
-                    wetsum += w[day].wet[hour]
-                    wettemps += w[day].temp[hour]
+                    wetsum += self.w.wet[hour]
+                    wettemps += self.w.temp[hour]
                 else:
                     wetcnt = 0
                     wetsum = 0
                     wettemps = 0
 
-                w[day].wetcnt[hour] = wetcnt
-                w[day].wetmins[hour] = wetsum * 60
-                w[day].wettemps[hour] = wettemps
+                self.w.wetcnt[hour] = wetcnt
+                self.w.wetmins[hour] = wetsum * 60
+                self.w.wettemps[hour] = wettemps
 
-                tmax = max(tmax, w[day].temp[hour])
-                w[day].dlyrain += w[day].rainfall[hour]
+                tmax = max(tmax, self.w.temp[hour])
+                self.w.dlyrain += self.w.rainfall[hour]
                 cnt += 1
-                w[day].dlytemp += (w[day].temp[hour] - w[day].dlytemp) / cnt
+                self.w.dlytemp += (self.w.temp[hour] - self.w.dlytemp) / cnt
             
             dd7 += max((tmax-7), 0)
-            w[day].dd7 = dd7
+            self.w.dd7 = dd7
                 
     """
     CYCLE.C METHODS
@@ -226,14 +223,14 @@ class dmcast2(object):
             isprd = 0
             tmpsum = 0.0
 
-        if (hour <= 21 and hour > 5) or w[day].rh[hour] < 90.0:
+        if (hour <= 21 and hour > 5) or self.w.rh[hour] < 90.0:
             isprd = 0
             tmpsum = 0.0
             istmp = 0.0
 
-        if (hour > 21 or hour <= 5) and w[day].rh[hour] >= 90.0:
+        if (hour > 21 or hour <= 5) and self.w.rh[hour] >= 90.0:
             isprd += 1
-            tmpsum += w[day].temp[hour]
+            tmpsum += self.w.temp[hour]
             istmp = tmpsum/isprd;
 
             if isprd < 4:
@@ -265,10 +262,10 @@ class dmcast2(object):
         # Set SV to the maximum amount of survival or sporulation.
         if sv < m[day].sp[hour]:
             sv = m[day].sp[hour]
-        t = w[day].temp[hour]
+        t = self.w.temp[hour]
 
         # Calculate SPMORT based on hourly temperature and relative humidity. 
-        if w[day].rh[hour] >= 90.0:
+        if self.w.rh[hour] >= 90.0:
             if t <= 25.0:
                 spmort = -0.00138 + 0.000496*t
             else:
@@ -288,7 +285,7 @@ class dmcast2(object):
         tsumi = 0.0
         infect = 0.0
 
-        tsumi = w[day].wettemps[hour]
+        tsumi = self.w.wettemps[hour]
 
         if tsumi<45.0:
             infect=0.0
@@ -322,7 +319,7 @@ class dmcast2(object):
             sumrisk = 0.0 
         
 
-        if w[day].ok[hour] != True: 
+        if self.w.ok[hour] != True: 
             return 0
 
         if day==day_last and hour==hour_last: 
