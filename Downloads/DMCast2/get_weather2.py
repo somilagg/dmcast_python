@@ -16,6 +16,7 @@ from pytz import timezone
 from bsddb import hashopen
 from cPickle import loads
 import numpy as np
+import csv
 
 
 
@@ -65,6 +66,9 @@ class general_weather(object) :
 		self.tmp = None
 		self.prcp = None
 		self.lwet = None
+		with open('dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv', 'rt') as csv_file:
+			reader = csv.reader(csv_file)
+			self.input_file = list(reader)
 
 	
 	def get_dates(self,obsTime,eTime) :
@@ -83,7 +87,7 @@ class general_weather(object) :
 
 		d = timedelta(days=1)
 		if var == None:
-				var = []
+			var = []
 		
 
 		while start <= end:
@@ -100,18 +104,30 @@ class general_weather(object) :
 	def get_time_from_datetime(self, val):
 		return val.time()
 
-	def get_observed(self,var,start,end) :
+	'''
+	0 - temp
+	1 - prcp
+	2 - rh
+	3 - lwet
+	'''
+	def get_observed(self,var,start,end,data_type) :
 		try :
+
 			var_new = self.setDateRange(var,start,end)
-			values  = list(map(self.get_time_from_datetime, var_new))
-			
+
+			values = []
 			flgs = []
-			dates = list(map(self.get_date_from_datetime, var_new))
+			dates = []
+			for i in range(len(var_new)):
+				values.append(self.input_file[i+1][data_type+1])
+				flgs.append(1)
+				dates.append(self.input_file[i+1][0])
+
 			sum = 0
 			for this_flg in flgs :
 				if this_flg == 1 :
 					sum = sum + 1
-			sum = len(dates)
+			print(sum)
 		except (Data.TSVar.UnavailableDateRange,Data.TSVarFactory.UnavailableDateRange) :
 			beginTime = apply(DateTime.Date,start)
 			stopTime = apply(DateTime.Date,end)
@@ -498,7 +514,7 @@ class general_dm_weather(object) :
 
 	def get_temperature(self,start,end) :
 		tmp = [] # needs to be modified to include temperature data
-		(sum,values,flags,dates,var) = self.stn.get_observed(tmp,start,end)
+		(sum,values,flags,dates,var) = self.stn.get_observed(tmp,start,end,0)
 		if sum==0 :
 			if self.tmpVar == None :
 				self.setup_sister_tmp()
@@ -538,7 +554,7 @@ class general_dm_weather(object) :
 
 	def get_precipitation(self,start,end) :
 		prcp = self.stn.prcp
-		(sum,values,flags,data,var) = self.stn.get_observed(prcp,start,end)
+		(sum,values,flags,data,var) = self.stn.get_observed(prcp,start,end,1)
 
 		if sum==0 :
 			if self.prcpVar == None :
@@ -582,7 +598,7 @@ class general_dm_weather(object) :
 
 	def get_rh(self,start,end) :
 		rh = self.stn.rh
-		(sum,values,flags,data,var) = self.stn.get_observed(rh,start,end)
+		(sum,values,flags,data,var) = self.stn.get_observed(rh,start,end,3)
 
 		if sum==0 :
 			if self.rhVar == None :
@@ -623,7 +639,7 @@ class general_dm_weather(object) :
 
 	def get_lwet(self,start,end) :
 		lwet = self.stn.lwet
-		(sum,values,flags,data,var) = self.stn.get_observed(lwet,start,end)
+		(sum,values,flags,data,var) = self.stn.get_observed(lwet,start,end,4)
 
 		if sum==0 :
 			if self.lwetVar == None :
