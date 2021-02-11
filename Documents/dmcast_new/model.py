@@ -4,10 +4,9 @@ import csv
 class daily_weather(object):
 
 	'''
-	date = [#,#]
 	starting from september 21st, get the average temp and rainfall each day
 	'''
-	def __init__(self, date):
+	def __init__(self, end_m, end_d):
 
 		#array of number of days in month
 		months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -17,10 +16,6 @@ class daily_weather(object):
 			reader = csv.reader(csv_file)
 			inp = list(reader)
 			inp.reverse()
-
-		#target end date
-		end_m = 8
-		end_d = 2
 		
 		#initalizing variables
 		curr_m = 7
@@ -126,4 +121,6 @@ class dmcast(object):
 
 
 if __name__ == '__main__':
-	daily_weather(3)
+
+	#return average temperature and precipitation from sep 1st to october 2nd
+	daily_weather(8, 2)
