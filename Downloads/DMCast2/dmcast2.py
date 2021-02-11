@@ -4,7 +4,6 @@ import datetime
 class wthr_t(object):
 
     def __init__(self):
-        #self.temp = np.empty([1, 24], dtype='datetime.time')
         self.temp = [0.0] * 24 
         self.rh = [datetime.time.min] * 8784
         self.wet = [datetime.time.min] * 8784
@@ -20,24 +19,24 @@ class wthr_t(object):
 class cultivar_t(object):
 
     def __init__(self):
-        els = np.empty([1, 367])
-        rincb = np.empty([367, 24])
-        sincb = np.empty([367, 24])
-        els12 = 0.0
-        primary_inf = 0.0
-        incubation = 0.0
-        dmwarns = 0.0
+        self.els = np.empty([1, 367])
+        self.rincb = np.empty([367, 24])
+        self.sincb = np.empty([367, 24])
+        self.els12 = 0.0
+        self.primary_inf = 0.0
+        self.incubation = 0.0
+        self.dmwarns = 0.0
 
 class model_t(object):
 
     def __init__(self):
-        sp = np.empty([1, 24])
-        sv = np.empty([1, 24])
-        dmrisk = np.empty([1, 24])
-        isprd = np.empty([1, 24])
-        istmp = np.empty([1, 24])
-        spmort = np.empty([1, 24])
-        infect = np.empty([1, 24])
+        self.sp = np.empty([1, 24])
+        self.sv = np.empty([1, 24])
+        self.dmrisk = np.empty([1, 24])
+        self.isprd = np.empty([1, 24])
+        self.istmp = np.empty([1, 24])
+        self.spmort = np.empty([1, 24])
+        self.infect = np.empty([1, 24])
 
 class warning_t(object):
 
@@ -104,17 +103,17 @@ class dmcast2(object):
 
         for day in range(1, day_last):
             Dday7 = self.w.dd7
-            c[0].els[day] = A * (1 + exp(B-k*Dday7)) ** (1.0/(1.0-m))
-            if c[0].els[day] >= 12 and c[0].els12 == 0:
-                c[0].els12 = day 
+            self.c.els[day] = A * (1 + exp(B-k*Dday7)) ** (1.0/(1.0-m))
+            if self.c.els[day] >= 12 and self.c.els12 == 0:
+                self.c.els12 = day 
 
-        c[0].els[day_last] = c[0].els[day_last-1]
+        self.c.els[day_last] = self.c.els[day_last-1]
 
     def primary_infection(self):
 
         for day in range (0, self.day_last):
-            if self.c[0].els[day] >= 12 and self.w.dlyrain > 2.54 and w[day.dlytemp] > 11.1:
-                self.c[0].primary_inf = day 
+            if self.c.els[day] >= 12 and self.w.dlyrain > 2.54 and w[day.dlytemp] > 11.1:
+                self.c.primary_inf = day 
                 break
 
     def incubation_period(self):
@@ -132,18 +131,18 @@ class dmcast2(object):
                         rincb = (1.0/y)/24.0
                     else:
                         rincb = 0.0
-                    self.c[0].rincb[day][hour] = rincb
-                self.c[0].sincb[day][hour] = self.c[0].sincb[day][hour-1] + c[0].rincb[day][hour]
+                    self.c.rincb[day][hour] = rincb
+                self.c.sincb[day][hour] = self.c.sincb[day][hour-1] + self.c.rincb[day][hour]
         sincb = 0
-        for day in range(c[0].primary_inf, day_last+1):
+        for day in range(int(self.c.primary_inf), int(self.day_last+1)):
             for hour in range(0, 24):
-                if (day==day_first and hour<hour_first) and (day==day_last and hour>hour_last):
+                if (day==self.day_first and hour<self.hour_first) and (day==self.day_last and hour>self.hour_last):
                     break
-                self.c[0].rincb[day][hour] = self.c[0].rincb[day][hour]
-                sincb += self.c[0].rincb[day][hour]
-                self.c[0].sincb[day][hour] = sincb
+                self.c.rincb[day][hour] = self.c.rincb[day][hour]
+                sincb += self.c.rincb[day][hour]
+                self.c.sincb[day][hour] = sincb
                 if (sincb > 0.9999):
-                    self.c[0].incubation = day
+                    self.c.incubation = day
                     break
                 
     """
@@ -160,7 +159,6 @@ class dmcast2(object):
             hour = int(float_hour)
 
             self.w.temp[hour] = tmp[index]
-            print(type(tmp[index]))
 
             self.w.rh[hour] = rh[index]
             self.w.rainfall[hour] = prcp[index]
@@ -356,8 +354,8 @@ class dmcast2(object):
             
 
             # for cultivar specific warnings 
-            if day >= c[0].incubation:
-                c[0].dmwarns += 1
+            if day >= self.c.incubation:
+                self.c.dmwarns += 1
 
     def run_disease_model(self, w_sday, w_shour, w_eday, w_ehour, w_duration, w_params):
         for day in range(day_first, day_last+1):
@@ -379,9 +377,9 @@ class dmcast2(object):
             w_duration[day] = wrn[day].duration
 
         w_parms[0] = dmwarns
-        w_parms[1] = c[0].els12
-        w_parms[2] = c[0].primary_inf
-        w_parms[3] = c[0].incubation
+        w_parms[1] = self.c.els12
+        w_parms[2] = self.c.primary_inf
+        w_parms[3] = self.c.incubation
 
     """
     MISC.C METHODS

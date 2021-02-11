@@ -127,7 +127,6 @@ class general_weather(object) :
 			for this_flg in flgs :
 				if this_flg == 1 :
 					sum = sum + 1
-			print(sum)
 		except (Data.TSVar.UnavailableDateRange,Data.TSVarFactory.UnavailableDateRange) :
 			beginTime = apply(DateTime.Date,start)
 			stopTime = apply(DateTime.Date,end)

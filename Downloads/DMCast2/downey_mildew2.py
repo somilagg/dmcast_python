@@ -135,17 +135,18 @@ class general_dm(object):
 
 
 	def update_all_days(self) :
-		eTime = apply(DateTime.Date,self.eDate)
+		print(type(self.eDate))
+		eTime = self.eDate
 		#
 		# PLEASE NOTE:  
 		# For the current program to work, we must start on Jan. 1
 		# This has impact on figuring out indexes among other things.
 		#               
-		sTime = DateTime.DateTime(self.eDate[0],1,1)
+		sTime = datetime(self.eDate.year,1,1,0,0)
 		while sTime <= eTime : 
 			this_date = "%02d/%02d"%(sTime.month,sTime.day)
-			self.all_days[sTime.day_of_year] = this_date
-			sTime = sTime + DateTime.RelativeDate(days=+1)
+			self.all_days[sTime.timetuple().tm_yday] = this_date
+			sTime = sTime + timedelta(days=1)
 
 		
 
@@ -259,8 +260,8 @@ class general_dm(object):
 		# -----------------------------------
 		# disease setup
 		# -----------------------------------
-		intPtr = C.POINTER(C.c_int*367)
-		YearIntArray = C.c_int*367
+		# intPtr = C.POINTER(C.c_int*367)
+		# YearIntArray = C.c_int*367
 		#
 		# parm fields: 
 		#  - number of warnings
@@ -269,37 +270,38 @@ class general_dm(object):
 		#  - incubation
 		#
 		parmArray = C.c_int*4
-		constantPtr = C.POINTER(C.c_int*4)
+		# constantPtr = C.POINTER(C.c_int*4)
 		
-		empty_vals = [0,]*367
-		vals = array.array('I',empty_vals)
+		# empty_vals = [0,]*367
+		# vals = array.array('I',empty_vals)
 		
-		self.sdays = YearIntArray(*vals)
-		sdaysPtr = C.pointer(self.sdays)
+		# self.sdays = YearIntArray(*vals)
+		# sdaysPtr = C.pointer(self.sdays)
 
-		self.shours = YearIntArray(*vals)
-		shoursPtr = C.pointer(self.shours)
+		# self.shours = YearIntArray(*vals)
+		# shoursPtr = C.pointer(self.shours)
 
-		self.edays = YearIntArray(*vals)
-		edaysPtr = C.pointer(self.edays)
+		# self.edays = YearIntArray(*vals)
+		# edaysPtr = C.pointer(self.edays)
 
-		self.ehours = YearIntArray(*vals)
-		ehoursPtr = C.pointer(self.ehours)
+		# self.ehours = YearIntArray(*vals)
+		# ehoursPtr = C.pointer(self.ehours)
 
-		self.duration = YearIntArray(*vals)
-		durationPtr = C.pointer(self.duration)
+		# self.duration = YearIntArray(*vals)
+		# durationPtr = C.pointer(self.duration)
 
 		parm_vals = [0, ]*4
 		vals = array.array('I',parm_vals)
+		# c_parms = parmArray(*vals)
+		# parmPtr = C.pointer(c_parms)
+
+
+		# disease = _dmC.run_disease_model
+		# disease.argtypes = [intPtr,intPtr,intPtr,intPtr,intPtr,constantPtr]
+
+
+		# retCode = disease(sdaysPtr,shoursPtr,edaysPtr,ehoursPtr,durationPtr,parmPtr)
 		c_parms = parmArray(*vals)
-		parmPtr = C.pointer(c_parms)
-
-
-		disease = _dmC.run_disease_model
-		disease.argtypes = [intPtr,intPtr,intPtr,intPtr,intPtr,constantPtr]
-
-
-		retCode = disease(sdaysPtr,shoursPtr,edaysPtr,ehoursPtr,durationPtr,parmPtr)
 		self.dm_warnings = c_parms[0]
 		self.els12 = c_parms[1]
 		self.primary_inf = c_parms[2]
@@ -336,7 +338,7 @@ class general_dm(object):
 		return self.warnings_history
 
 	def getDayIndex(self,sDay) :
-		start_index = self.dayList.index(sDay)
+		start_index = self.dayList[sDay]
 
 		val = 0
 		while( (self.c_days[start_index + val] == sDay) and 
