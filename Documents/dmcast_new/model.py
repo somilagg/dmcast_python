@@ -132,6 +132,7 @@ class daily_weather(object):
 
 		self.primary_infection()
 		self.secondary_infection()
+		self.cycle()
 			
 	def generate_els(self):
 
@@ -181,7 +182,23 @@ class daily_weather(object):
 			if sincb > 0.9999:
 				self.ret_matrix[i].append(1)
 
+	def sporulation(self, arr):
 
+		if (arr[2] > 21 or arr[2] <= 5) and (arr[6] >= 90:
+
+
+	def survival(self, arr):
+		pass
+
+	def infection(self, arr):
+		pass
+
+	def cycle(self):
+
+		for i in range(len(self.main_matrix)):
+			self.sporulation(self.main_matrix[i])
+			self.survival(self.main_matrix[i])
+			self.infection(self.main_matrix[i])
 
 class phenology_model(object):
 
