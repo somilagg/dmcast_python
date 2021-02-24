@@ -5,6 +5,21 @@ class daily_weather(object):
 
 	'''
 	starting from september 21st, get the average temp and rainfall each day
+	
+	matrix guide:
+	self.matrix = daily features with tmp and prcp
+	self.matrix_total = hourly features with tmp and prcp
+	self.main_matrix = hourly features with whole dataset:
+	 - airTempF
+	 - precipInches
+	 - leafWetness
+	 - rhPercent
+	 - windSpeed
+	 - windDirDegrees
+	 - solarRadLangleys
+	 - soilTempF
+	 - soilMoistM3M3
+	 - dewpointF
 	'''
 	def __init__(self, end_m, end_d):
 
@@ -29,6 +44,7 @@ class daily_weather(object):
 		index = 0
 		self.ret_matrix = []
 		self.ret_matrix_total = []
+		self.main_matrix = []
 
 		#goes until the end date is reached
 		while end_m != curr_m or end_d != curr_d:
@@ -53,22 +69,54 @@ class daily_weather(object):
 			#continue until next date is reached
 			while orig_m == curr_m and orig_d == curr_d:
 				ret_arr_total = []
+				main_matrix_arr = []
+
 				#add to total trackers
 				total_temp += float(inp[index][1])
 				total_prcp += float(inp[index][2])
+
+				#to add to ret_matrix
 				ret_arr_total.append(curr_m)
 				ret_arr_total.append(curr_d)
 				ret_arr_total.append(int(s[11:13]))
 				temp_C = 5.0/9.0 * (float(inp[index][1]) - 32)
 				ret_arr_total.append(round(temp_C,2))
 				ret_arr_total.append(float(inp[index][2]))
-				
+
+				#to add to main_matrix
+				main_matrix_arr.append(curr_m)
+				main_matrix_arr.append(curr_d)
+				main_matrix_arr.append(int(s[11:13]))
+				main_matrix_arr.append(round(temp_C,2))
+
+				try: main_matrix_arr.append(float(inp[index][2]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][3]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][4]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][5]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][6]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][7]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][8]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][9]))
+				except: main_matrix_arr.append(0.0)
+				try: main_matrix_arr.append(float(inp[index][10]))
+				except: main_matrix_arr.append(0.0)
+
+				#add to the matrices
+				self.main_matrix.append(main_matrix_arr)
+				self.ret_matrix_total.append(ret_arr_total)
+
 				#iterate and get values of next row
 				index += 1
 				s = inp[index][0]
 				curr_m = int(s[0:2])
 				curr_d = int(s[3:5])
-				self.ret_matrix_total.append(ret_arr_total)
 
 			#append month, day, total temperature, and total precipitation to array
 			ret_arr.append(curr_m)
@@ -83,9 +131,9 @@ class daily_weather(object):
 			index += 1
 
 		self.primary_infection()
+		self.secondary_infection()
 			
 	def generate_els(self):
-
 
 		for i in range(len(self.ret_matrix)):
 			if self.ret_matrix[i][2] > 7:
@@ -95,21 +143,6 @@ class daily_weather(object):
 
 			els = self.A * (1 + math.exp(self.B - self.k * dday7)) ** (1 / (1 - self.m))
 			self.ret_matrix[i].append(round(els,2))
-
-	# def calculate_second_infection(self, mon, day):
-		
-	# 	max_days = self.months[mon]
-	# 	sec_inf_day = day + 7
-
-	# 	if sec_inf_day > max_days:
-	# 		sec_inf_day -= max_days
-
-	# 		if mon == 12:
-	# 			mon = 1
-	# 		else:
-	# 			mon += 1
-
-	# 	return (mon, sec_inf_day)
 
 	def primary_infection(self):
 
@@ -125,7 +158,7 @@ class daily_weather(object):
 				self.ret_matrix[i].append(0)
 
 	def secondary_infection(self):
-		
+
 		for i in range(len(self.ret_matrix)):
 			if len(self.ret_matrix[i]) == 6:
 				mo = self.ret_matrix[0]
@@ -136,7 +169,7 @@ class daily_weather(object):
 
 				hour_temp = self.ret_matrix_total[total_pos][3]
 				if hour_temp > 8.0 and hour_temp < 35.0:
-					y = 41.961 - 3.5794 * temp + 0.09803 * temp ** 2 - 0.0005341 * temp ** 3
+					y = 41.961 - 3.5794 * hour_temp + 0.09803 * hour_temp ** 2 - 0.0005341 * hour_temp ** 3
 
 					if y > 0:
 						rincb = (1.0/y)/24.0
@@ -147,6 +180,7 @@ class daily_weather(object):
 
 			if sincb > 0.9999:
 				self.ret_matrix[i].append(1)
+
 
 
 class phenology_model(object):
