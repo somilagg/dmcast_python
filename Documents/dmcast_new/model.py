@@ -20,6 +20,26 @@ class daily_weather(object):
 	 - soilTempF
 	 - soilMoistM3M3
 	 - dewpointF
+
+	 self.final_matrix
+	  - 0:	month
+	  - 1:	day
+	  - 2:	hour
+	  - 3:	airTempF
+	  - 4:	precipInches
+	  - 5:	leafWetness
+	  - 6:	rhPercent
+	  - 7:	windSpeed
+	  - 8:	windDirDegrees
+	  - 9:	solarRadLangleys
+	  - 10:	soilTempF
+	  - 11:	soilMoistM3M3
+	  - 12:	dewpointF
+	  - 13: sp
+	  - 14:	spmort
+	  - 15: sv
+	  - 16: infect
+	  - 17: risk level 
 	'''
 	def __init__(self, end_m, end_d):
 
@@ -133,8 +153,6 @@ class daily_weather(object):
 		self.primary_infection()
 		self.secondary_infection()
 		self.cycle()
-		print("HERE")
-
 
 	def generate_els(self):
 
@@ -275,55 +293,23 @@ class daily_weather(object):
 		print(len(self.final_matrix))
 		print(len(self.final_matrix[1]))
 
-class phenology_model(object):
+	# '''
+	# ra = cumulative value of rain effect
+	# '''
+	# def days_osp_from_ra(self, ra):
+	# 	d = 118 - 0.3 * ra
+	# 	v = 13.5 + 0.02 * ra
+	# 	return d, v
 
-	def __init__(self):
-		pass
-
-class hourly_weather(object):
-
-	def __init__(self):
-		pass
-
-class dmcast(object):
-
-	def __init__(self):
-		pass
-
-	def initialization(self):
-		pass
-
-	def oospoure_maturation_model(self):
-		pass
-
-	def primary_infection_model(self):
-		pass
-
-	def primary_infection_date(self):
-		pass
-
-	def secondary_infection_models(self):
-		pass
-
-	def output(self):
-		pass
-	'''
-	ra = cumulative value of rain effect
-	'''
-	def days_osp_from_ra(self, ra):
-		d = 118 - 0.3 * ra
-		v = 13.5 + 0.02 * ra
-		return d, v
-
-	'''
-	D = mean days from Jan 1st required for ospore maturation
-	v = std dev days from Jan 1st required for ospore maturation
-	'''
-	def prob_osp(self, D, v, k):
-		ans = 1 / ( v * math.sqrt( 2 * math.pi ) )
-		exp = -0.5 * ( k * D / v ) ** 2
-		ans *= math.exp(exp)
-		return ans
+	# '''
+	# D = mean days from Jan 1st required for ospore maturation
+	# v = std dev days from Jan 1st required for ospore maturation
+	# '''
+	# def prob_osp(self, D, v, k):
+	# 	ans = 1 / ( v * math.sqrt( 2 * math.pi ) )
+	# 	exp = -0.5 * ( k * D / v ) ** 2
+	# 	ans *= math.exp(exp)
+	# 	return ans
 
 
 if __name__ == '__main__':
