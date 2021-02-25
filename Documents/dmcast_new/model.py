@@ -133,7 +133,9 @@ class daily_weather(object):
 		self.primary_infection()
 		self.secondary_infection()
 		self.cycle()
-			
+		print("HERE")
+
+
 	def generate_els(self):
 
 		for i in range(len(self.ret_matrix)):
@@ -183,22 +185,95 @@ class daily_weather(object):
 				self.ret_matrix[i].append(1)
 
 	def sporulation(self, arr):
+		
+		sp = 0.0
 
-		if (arr[2] > 21 or arr[2] <= 5) and (arr[6] >= 90:
+		if (arr[2] > 21 or arr[2] <= 5) and (arr[6] >= 90):
+			self.isprd += 1
+			self.tmpsum += arr[3]
+			self.istmp = self.tmpsum/self.isprd
 
+			if self.isprd >= 4:
+				if self.istmp > 13.0 and self.istmp < 22.5:
+					sp = max( (-642.0 + 53.7*self.istmp - 0.0356*self.istmp*self.istmp*self.istmp)/160.756 , 0.0 )
+				elif self.istmp >= 22.5 and self.istmp <= 28.0:
+					sp = 1.0
+				elif self.istmp > 28.0 and self.istmp < 30.0:
+					sp = 0.1
+				else:
+					sp = 0.0
+			else:
+				sp = 0.0
+		else:
+			sp = 0.0
+			self.isprd = 0
+			self.tmpsum = 0.0
+			self.istmp = 0.0
+
+		arr.append(sp)
+		return arr
 
 	def survival(self, arr):
-		pass
+		
+		spmort = 0.0
 
+		if self.sv < arr[11]:
+			sv = arr[11]
+
+		if arr[6] >= 90.0:
+			if arr[3] <= 25.0:
+				spmort = -0.00138 + 0.000496 * arr[3]
+			else:
+				spmort = -0.7711 + 0.03126 * arr[3]
+		else:
+			spmort = math.exp(-4.2057 - 0.2101 * arr[3] + 0.0095 * arr[3] * arr[3])
+
+		spmort = max(spmort, 0.0)
+		self.sv = self.sv - spmort
+		self.sv = max(self.sv, 0.0)
+
+		arr.append(spmort)
+		arr.append(self.sv)
+		return arr
+		
 	def infection(self, arr):
-		pass
+		
+		tsumi = arr[10]
+		infect = 0.0
+
+		if tsumi < 45.0:
+			infect = 0.0
+		elif tsumi >= 45.0 and tsumi < 50.0:
+			infect = 0.3/0.5 * (tsumi - 45.0) + 0.2
+		elif tsumi >= 50.0 and tsumi < 71.0:
+			infect = 0.5/21.0 * (tsumi - 50.0) + 0.5
+		else:
+			infect = 1.0
+
+		arr.append(infect)
+		arr.append(arr[len(arr)-2] * infect * 100)
+		return arr
 
 	def cycle(self):
 
+		self.final_matrix = []
+
+		self.isprd = 0
+		self.tmpsum = 0.0
+		self.istmp = 0.0
+
+		self.sv = 0.0
+
 		for i in range(len(self.main_matrix)):
-			self.sporulation(self.main_matrix[i])
-			self.survival(self.main_matrix[i])
-			self.infection(self.main_matrix[i])
+			temp_arr = []
+			temp_arr = self.sporulation(self.main_matrix[i])
+			temp_arr = self.survival(temp_arr)
+			temp_arr = self.infection(temp_arr)
+			self.final_matrix.append(temp_arr)
+
+		#print(self.final_matrix)
+		print(len(self.final_matrix))
+		print(len(self.final_matrix[1]))
 
 class phenology_model(object):
 
