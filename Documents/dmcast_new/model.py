@@ -7,21 +7,41 @@ class daily_weather(object):
 	starting from september 21st, get the average temp and rainfall each day
 	
 	matrix guide:
-	self.matrix = daily features with tmp and prcp
-	self.matrix_total = hourly features with tmp and prcp
-	self.main_matrix = hourly features with whole dataset:
-	 - airTempF
-	 - precipInches
-	 - leafWetness
-	 - rhPercent
-	 - windSpeed
-	 - windDirDegrees
-	 - solarRadLangleys
-	 - soilTempF
-	 - soilMoistM3M3
-	 - dewpointF
+	#################
 
-	 self.final_matrix
+	self.main_matrix = hourly features from original dataset:
+	 - 0:	month
+	 - 1:	day
+	 - 2:	hour
+	 - 3:	airTempF
+	 - 4:	precipInches
+	 - 5:	leafWetness
+	 - 6:	rhPercent
+	 - 7:	windSpeed
+	 - 8:	windDirDegrees
+	 - 9:	solarRadLangleys
+	 - 10:	soilTempF
+	 - 11:	soilMoistM3M3
+	 - 12:	dewpointF
+
+	self.ret_matrix = daily features with tmp and prcp
+	 - 0:	month
+	 - 1:	day
+	 - 2:	dlytemp
+	 - 3:	dlyprcp
+	 - 4:	els
+	 - 5:	primary inf indicator
+	 - 6:	incubation period indicaator
+	 - 7:	incubation status (only happens if 6: exists)
+
+	self.matrix_total = hourly features with tmp and prcp
+	 - 0:	month
+	 - 1:	day
+	 - 2:	hour
+	 - 3:	temp
+	 - 4:	prcp
+
+	 self.final_matrix = array with primary & secondary model features
 	  - 0:	month
 	  - 1:	day
 	  - 2:	hour
@@ -151,7 +171,7 @@ class daily_weather(object):
 			index += 1
 
 		self.primary_infection()
-		self.secondary_infection()
+		self.incubation_period()
 		self.cycle()
 
 	def generate_els(self):
@@ -167,27 +187,44 @@ class daily_weather(object):
 
 	def primary_infection(self):
 
+		#generate els for day and add to matrix
 		self.generate_els()
 
+		#check for primary infection conditions
 		for i in range(len(self.ret_matrix)):
 			if self.ret_matrix[i][2] > 11.1 and self.ret_matrix[i][3] > 2.54 and self.ret_matrix[i][4] > 12:
-				self.ret_matrix[i].append(1)
+				
+				#add 1 to indicate primary model
+				if len(self.ret_matrix[i]) == 6:
+					self.ret_matrix[i][5] = 1
+				else:
+					self.ret_matrix[i].append(1)
 
-				#(m, d) = self.calculate_second_infection(self.ret_matrix[i][0], self.ret_matrix[i][1])
-				self.ret_matrix[i+7].append(1)
+				#add 1 to indicate seconday model 7 days from now
+				if len(self.ret_matrix[i+7]) == 7:
+					self.ret_matrix[i+7][6] = 1
+				elif len(self.ret_matrix[i+7]) == 6:
+					self.ret_matrix[i+7].append(1)
+				else:
+					self.ret_matrix[i+7].append(0)
+					self.ret_matrix[i+7].append(1)
+
 			else:
 				self.ret_matrix[i].append(0)
 
-	def secondary_infection(self):
+	def incubation_period(self):
 
 		for i in range(len(self.ret_matrix)):
-			if len(self.ret_matrix[i]) == 6:
+
+			sincb = 0
+
+			#its of length 7 if secondary infection was added
+			if len(self.ret_matrix[i]) == 7:
 				mo = self.ret_matrix[0]
 				da = self.ret_matrix[1]
 
 				total_pos = 23 * i
-				sincb = 0
-
+				
 				hour_temp = self.ret_matrix_total[total_pos][3]
 				if hour_temp > 8.0 and hour_temp < 35.0:
 					y = 41.961 - 3.5794 * hour_temp + 0.09803 * hour_temp ** 2 - 0.0005341 * hour_temp ** 3
@@ -199,9 +236,27 @@ class daily_weather(object):
 
 					sincb += rincb
 
+			#appends incubation status variable if threshold exceeded
 			if sincb > 0.9999:
 				self.ret_matrix[i].append(1)
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This subroutine estimates sporulation factor at each hour depending on  CC
+	CC   temperature and relative humidity.                                      CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	CC  List of variables:                                                       CC
+	CC   ISPRD = Hours of sporulation period: Sporulation starts when conditions CC
+	CC          are favorable at least 4 hours (i.e., ISPD>=4) without any       CC
+	CC          interuption                                                      CC
+	CC   ISTMP = Average temperature during ISPRD                                CC
+	CC   TMPSUM = Sum of hourly temperature during ISPRD                         CC
+	CC   SP = Sporulation factor                                                 CC
+	C*****************************************************************************C
+	CCC==Sporulation occurs only during night (21:00-5:00) and relative humidity
+	CCC==is greater than 90% 
+	'''
 	def sporulation(self, arr):
 		
 		sp = 0.0
@@ -211,6 +266,7 @@ class daily_weather(object):
 			self.tmpsum += arr[3]
 			self.istmp = self.tmpsum/self.isprd
 
+			#determine sporulation factor
 			if self.isprd >= 4:
 				if self.istmp > 13.0 and self.istmp < 22.5:
 					sp = max( (-642.0 + 53.7*self.istmp - 0.0356*self.istmp*self.istmp*self.istmp)/160.756 , 0.0 )
@@ -231,6 +287,19 @@ class daily_weather(object):
 		arr.append(sp)
 		return arr
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This subroutine estimates mortality factor of spores and calculates     CC
+	CC   survival factor at each hour depending on temperature and relative      CC
+	CC   humidity.                                                               CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	CC   List of variables:                                                      CC
+	CC    SP = Sporulation factor                                                CC
+	CC    SV = Spore survival factor                                             CC
+	CC    SPMORT = Spore mortality factor                                        CC
+	C*****************************************************************************C
+	'''
 	def survival(self, arr):
 		
 		spmort = 0.0
@@ -253,7 +322,27 @@ class daily_weather(object):
 		arr.append(spmort)
 		arr.append(self.sv)
 		return arr
-		
+	
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This subroutine identifies favorable environmental conditions for       CC
+	CC   infection process of the fungus.  Longer than 10 min of wetness period  CC
+	CC   is necessary to make infection.                                         CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	CC   List of variables:                                                      CC
+	CC    INFECT = Infection factor                                              CC
+	CC    TSUMI = Sum of temperature during infection period                     CC
+	CC    DF = Risk level of disease development                                 CC
+	CC                                                                           CC
+	CC    AVTMPI = Average temperature during the infection period               CC
+	CC    WETPRD = Wetness period in minutes                                     CC
+	CC    NI = Hours of a consecutive wetness period                             CC
+	CC    IDSTRT = Starting date of wetness period                               CC
+	CC    IHSTRT = Starting hour of wetness period                               CC
+	CC    WETSUM = Sum of wetness period during infection period                 CC
+	C*****************************************************************************C
+	'''
 	def infection(self, arr):
 		
 		tsumi = arr[10]
@@ -289,30 +378,8 @@ class daily_weather(object):
 			temp_arr = self.infection(temp_arr)
 			self.final_matrix.append(temp_arr)
 
-		#print(self.final_matrix)
-		print(len(self.final_matrix))
-		print(len(self.final_matrix[1]))
-
-	# '''
-	# ra = cumulative value of rain effect
-	# '''
-	# def days_osp_from_ra(self, ra):
-	# 	d = 118 - 0.3 * ra
-	# 	v = 13.5 + 0.02 * ra
-	# 	return d, v
-
-	# '''
-	# D = mean days from Jan 1st required for ospore maturation
-	# v = std dev days from Jan 1st required for ospore maturation
-	# '''
-	# def prob_osp(self, D, v, k):
-	# 	ans = 1 / ( v * math.sqrt( 2 * math.pi ) )
-	# 	exp = -0.5 * ( k * D / v ) ** 2
-	# 	ans *= math.exp(exp)
-	# 	return ans
-
-
 if __name__ == '__main__':
 
 	#return average temperature and precipitation from sep 1st to october 2nd
 	daily_weather(8, 2)
+	print("completed running model.py")
