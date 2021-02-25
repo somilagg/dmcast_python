@@ -3,11 +3,26 @@ import csv
 
 class daily_weather(object):
 
-	'''
-	starting from september 21st, get the average temp and rainfall each day
-	
+	'''	
+	system design (basic guide):
+	##################################
+
+	1. 	create matrix with daily temp, prcp
+	2. 	create matrix with hourly temp, prcp
+	3. 	call primary infection
+	4. 	generate els variable
+	5. 	include primary infection variable
+	6. 	include secondary infection variable (if applicable)
+	7. 	call incubation period
+	8. 	sets incubation status if secondary infection variable is 1
+	9. 	calls cycle
+	10. inside cycle, calls sporulation and adds sporulation factor
+	11. inside cycle, calls survival and adds spore survival factor and spore mortality factor
+	12. inside cycle, calls infection and adds infection factor and risk level of disease development
+	13. fin!
+
 	matrix guide:
-	#################
+	##################################
 
 	self.main_matrix = hourly features from original dataset:
 	 - 0:	month
@@ -284,7 +299,7 @@ class daily_weather(object):
 			self.tmpsum = 0.0
 			self.istmp = 0.0
 
-		arr.append(sp)
+		arr.append(round(sp,2))
 		return arr
 
 	'''
@@ -319,8 +334,8 @@ class daily_weather(object):
 		self.sv = self.sv - spmort
 		self.sv = max(self.sv, 0.0)
 
-		arr.append(spmort)
-		arr.append(self.sv)
+		arr.append(round(spmort,2))
+		arr.append(round(self.sv,2))
 		return arr
 	
 	'''
@@ -357,8 +372,8 @@ class daily_weather(object):
 		else:
 			infect = 1.0
 
-		arr.append(infect)
-		arr.append(arr[len(arr)-2] * infect * 100)
+		arr.append(round(infect,2))
+		arr.append(round(arr[len(arr)-2] * infect * 100,2))
 		return arr
 
 	def cycle(self):
@@ -377,6 +392,8 @@ class daily_weather(object):
 			temp_arr = self.survival(temp_arr)
 			temp_arr = self.infection(temp_arr)
 			self.final_matrix.append(temp_arr)
+
+		print(self.final_matrix)
 
 if __name__ == '__main__':
 
