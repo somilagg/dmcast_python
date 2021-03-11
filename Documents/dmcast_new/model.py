@@ -78,6 +78,8 @@ class daily_weather(object):
 	'''
 	def __init__(self, end_m, end_d, test=False, test_method_num=0):
 
+		self.print_introduction(test)
+
 		# setting initial cultivars values to Chardonnay
 		self.A = 35.2
 		self.B = 1.44
@@ -193,8 +195,53 @@ class daily_weather(object):
 			index += 1
 
 		self.primary_infection()
+
+		print("#	-------------------------------------------------	#")
+		print("#	Successfully calculated primary infection model.")
+		print("#	-------------------------------------------------	#")
+		print ""
+
 		self.incubation_period()
+
+		print("#	-------------------------------------------------	#")
+		print("#	Successfully calculated incubation period.")
+		print("#	-------------------------------------------------	#")
+		print ""
+
 		self.cycle()
+
+		print("#	-------------------------------------------------	#")
+		print("#	Successfully calculated CYCLE.")
+		print("#	-------------------------------------------------	#")
+		print ""
+
+		print('Primary infection conditions satisfied on:')
+		if len(self.primary_list) == 0:
+			print("NONE")
+		else:
+			print(self.primary_list)
+
+		print ""
+		print('Secondary infection conditions satisfied on:')
+		if len(self.secondary_list) == 0:
+			print("NONE")
+		else:
+			print(self.secondary_list)
+
+
+	def print_introduction(self, test):
+		print ""
+		print("#	-------------------------------------------------	#")
+		print("#	Welcome to the updated version of DMCast!")
+		print("#	Made by Somil Aggarwal & Katie Gold")
+
+		if test == True:
+			print("#	Running version: TEST")
+		else:
+			print("#	Running version: NORMAL")
+
+		print("#	-------------------------------------------------	#")
+		print ""
 
 	def generate_els(self):
 
@@ -224,12 +271,13 @@ class daily_weather(object):
 		self.generate_els()
 
 		#check for primary infection conditions
+		self.primary_list = []
+		self.secondary_list = []
 		for i in range(len(self.ret_matrix)):
 			if self.ret_matrix[i][2] > 11.1 and self.ret_matrix[i][3] > 2.54 and self.ret_matrix[i][4] > 12:
 				
-				print("MADE IT HERE")
 				#add 1 to indicate primary model
-				print(len(self.ret_matrix[i]))
+				self.primary_list.append((self.ret_matrix[i][0], self.ret_matrix[i][1]))
 				if len(self.ret_matrix[i]) == 6:
 					self.ret_matrix[i][5] = 1
 				else:
@@ -246,6 +294,7 @@ class daily_weather(object):
 					else:
 						self.ret_matrix[i+7].append(0)
 						self.ret_matrix[i+7].append(1)
+						self.secondary_list.append((self.ret_matrix[i+7][0], self.ret_matrix[i+7][1]))
 
 			else:
 				self.ret_matrix[i].append(0)
@@ -277,6 +326,7 @@ class daily_weather(object):
 			#appends incubation status variable if threshold exceeded
 			if sincb > 0.9999:
 				self.ret_matrix[i].append(1)
+				self.secondary_list.append((ret_matrix[0], ret_matrix[1]))
 
 	'''
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -420,6 +470,8 @@ class daily_weather(object):
 
 	def run_test(self, test_num):
 		if test_num == 1:
+
+			#base test case
 			with open('test_input_1.csv', mode='w') as csv_file:
 				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
@@ -430,9 +482,48 @@ class daily_weather(object):
 
 			return 'test_input_1.csv'
 
+		elif test_num == 2:
+
+			#sufficient temperature for primary - nothing else
+			pass
+
+		elif test_num == 3:
+
+			#sufficient precipitation for primary - nothing else
+			pass
+
+		elif test_num == 4:
+
+			#sufficient els for primary - nothing else
+			pass
+
+		elif test_num == 5:
+
+			#sufficient temperature and precipitation for primary - nothing else
+			pass
+
+		elif test_num == 6:
+
+			#sufficient temperature and els for primary - nothing else
+			pass
+
+		elif test_num == 7:
+
+			#sufficient precipitation and els for primary - nothing else
+			pass
+
+		elif test_num == 8:
+
+			#all sufficient primary conditions
+			pass
+
 
 if __name__ == '__main__':
 
 	#return average temperature and precipitation from sep 1st to october 2nd
-	obj = daily_weather(0, 0, True, 1)
-	print("completed running test")
+	#daily_weather(0, 0, True, 1)
+	daily_weather(8, 2)
+	print ""
+	print("#	-------------------------------------------------	#")
+	print("#	Successfully completed running model.py")
+	print("#	-------------------------------------------------	#")
