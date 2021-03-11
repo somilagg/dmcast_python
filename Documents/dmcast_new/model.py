@@ -76,19 +76,24 @@ class daily_weather(object):
 	  - 16: infect
 	  - 17: risk level 
 	'''
-	def __init__(self, end_m, end_d):
+	def __init__(self, end_m, end_d, test=False, test_method_num=0):
 
-		# setting initial cultivars values to Concord
-		self.A = 34.1
-		self.B = 3.33
-		self.k = 0.0041
-		self.m = 2.075
+		# setting initial cultivars values to Chardonnay
+		self.A = 35.2
+		self.B = 1.44
+		self.k = 0.0029
+		self.m = 1.438
 
 		#array of number of days in month
 		self.months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
+		if test_method_num ==  0:
+			file_name = 'dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv'
+		else:
+			file_name = self.run_test(test_method_num)
+
 		#read in csv file to list
-		with open('dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv', 'rt') as csv_file:
+		with open(file_name, 'rt') as csv_file:
 			reader = csv.reader(csv_file)
 			inp = list(reader)
 			inp.reverse()
@@ -102,7 +107,7 @@ class daily_weather(object):
 		self.main_matrix = []
 
 		#goes until the end date is reached
-		while end_m != curr_m or end_d != curr_d:
+		while (end_m != curr_m or end_d != curr_d) and index < len(inp):
 
 			#increase month if day limit is exceeded
 			if curr_d > self.months[curr_m-1]:
@@ -122,13 +127,13 @@ class daily_weather(object):
 			orig_d = curr_d
 
 			#continue until next date is reached
-			while orig_m == curr_m and orig_d == curr_d:
+			while orig_m == curr_m and orig_d == curr_d and index < len(inp):
 				ret_arr_total = []
 				main_matrix_arr = []
 
 				#add to total trackers
 				total_temp += float(inp[index][1])
-				total_prcp += float(inp[index][2])
+				total_prcp += float(inp[index][2]) * 25.4
 
 				#to add to ret_matrix
 				ret_arr_total.append(curr_m)
@@ -136,7 +141,7 @@ class daily_weather(object):
 				ret_arr_total.append(int(s[11:13]))
 				temp_C = 5.0/9.0 * (float(inp[index][1]) - 32)
 				ret_arr_total.append(round(temp_C,2))
-				ret_arr_total.append(float(inp[index][2]))
+				ret_arr_total.append(float(inp[index][2]) * 25.4)
 
 				#to add to main_matrix
 				main_matrix_arr.append(curr_m)
@@ -144,7 +149,7 @@ class daily_weather(object):
 				main_matrix_arr.append(int(s[11:13]))
 				main_matrix_arr.append(round(temp_C,2))
 
-				try: main_matrix_arr.append(float(inp[index][2]))
+				try: main_matrix_arr.append(float(inp[index][2]) * 25.4)
 				except: main_matrix_arr.append(0.0)
 				try: main_matrix_arr.append(float(inp[index][3]))
 				except: main_matrix_arr.append(0.0)
@@ -169,9 +174,11 @@ class daily_weather(object):
 
 				#iterate and get values of next row
 				index += 1
-				s = inp[index][0]
-				curr_m = int(s[0:2])
-				curr_d = int(s[3:5])
+				if(index < len(inp)):
+					s = inp[index][0]
+					curr_m = int(s[0:2])
+					curr_d = int(s[3:5])
+
 
 			#append month, day, total temperature, and total precipitation to array
 			ret_arr.append(curr_m)
@@ -197,7 +204,18 @@ class daily_weather(object):
 			else:
 				dday7 = 0
 
-			els = self.A * (1 + math.exp(self.B - self.k * dday7)) ** (1 / (1 - self.m))
+			#dday7 = 5
+			'''
+			A= 35
+			B= 1.5
+			k= 0.003
+			m=1.5
+			'''
+			expo = self.B - self.k * dday7
+			pwr = 1 / (1 - self.m)
+			els = self.A * (1 + math.exp(expo)) ** pwr
+			#		35    * 0.03)
+			els = 13
 			self.ret_matrix[i].append(round(els,2))
 
 	def primary_infection(self):
@@ -209,20 +227,25 @@ class daily_weather(object):
 		for i in range(len(self.ret_matrix)):
 			if self.ret_matrix[i][2] > 11.1 and self.ret_matrix[i][3] > 2.54 and self.ret_matrix[i][4] > 12:
 				
+				print("MADE IT HERE")
 				#add 1 to indicate primary model
+				print(len(self.ret_matrix[i]))
 				if len(self.ret_matrix[i]) == 6:
 					self.ret_matrix[i][5] = 1
 				else:
 					self.ret_matrix[i].append(1)
 
+				#!--- look into modifying this factor since this is a proxy for growers - not actual indicator ---!
+				#!--- move to spore mortality (?) ---!
 				#add 1 to indicate seconday model 7 days from now
-				if len(self.ret_matrix[i+7]) == 7:
-					self.ret_matrix[i+7][6] = 1
-				elif len(self.ret_matrix[i+7]) == 6:
-					self.ret_matrix[i+7].append(1)
-				else:
-					self.ret_matrix[i+7].append(0)
-					self.ret_matrix[i+7].append(1)
+				if i+7 < len(self.ret_matrix):
+					if len(self.ret_matrix[i+7]) == 7:
+						self.ret_matrix[i+7][6] = 1
+					elif len(self.ret_matrix[i+7]) == 6:
+						self.ret_matrix[i+7].append(1)
+					else:
+						self.ret_matrix[i+7].append(0)
+						self.ret_matrix[i+7].append(1)
 
 			else:
 				self.ret_matrix[i].append(0)
@@ -374,6 +397,8 @@ class daily_weather(object):
 
 		arr.append(round(infect,2))
 		arr.append(round(arr[len(arr)-2] * infect * 100,2))
+		if (arr[len(arr)-1] > 0):
+			print("greater than 0")
 		return arr
 
 	def cycle(self):
@@ -393,10 +418,21 @@ class daily_weather(object):
 			temp_arr = self.infection(temp_arr)
 			self.final_matrix.append(temp_arr)
 
-		print(self.final_matrix)
+	def run_test(self, test_num):
+		if test_num == 1:
+			with open('test_input_1.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+				csv_writer.writerow(['07/01/2020 03:00 EDT', '50', '0', '54', '90', '2', '220', '0', '61', '0.25', '48'])
+				csv_writer.writerow(['07/01/2020 02:00 EDT', '50', '0', '54', '90', '2', '220', '0', '61', '0.25', '48'])
+				csv_writer.writerow(['07/01/2020 01:00 EDT', '50', '0', '54', '90', '2', '220', '0', '61', '0.25', '48'])
+				csv_file.close()
+
+			return 'test_input_1.csv'
+
 
 if __name__ == '__main__':
 
 	#return average temperature and precipitation from sep 1st to october 2nd
-	daily_weather(8, 2)
-	print("completed running model.py")
+	obj = daily_weather(0, 0, True, 1)
+	print("completed running test")
