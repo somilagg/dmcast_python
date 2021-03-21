@@ -518,145 +518,69 @@ class daily_weather(object):
 	CC    TEST_NUM = test number to run on 				                         CC
 	C*****************************************************************************C
 	'''
+
+	def generate_test_dataset(self, test_num, input_arr):
+
+		file_name = 'test_input_' + str(test_num) + '.csv'
+		with open(file_name, mode='w') as csv_file:
+			csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+			for d in range(0, 31):
+				d_str = ('0' + str(d)) if (d < 10) else str(d)
+				for h in range(1, 24):
+					h_str = ('0' + str(h)) if (h < 10) else str(h)
+					t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+					input_arr[0] = t
+					csv_writer.writerow(input_arr)
+
+			csv_file.close()
+
+		return file_name
+
 	def run_test(self, test_num):
-		if test_num == 1:
 
-			#base test case
-			with open('test_input_1.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+		if test_num == 2:
 
-				csv_writer.writerow(['07/01/2020 03:00 EDT', '50', '0', '54', '90', '2', '220', '0', '61', '0.25', '48'])
-				csv_writer.writerow(['07/01/2020 02:00 EDT', '50', '0', '54', '90', '2', '220', '0', '61', '0.25', '48'])
-				csv_writer.writerow(['07/01/2020 01:00 EDT', '50', '0', '54', '90', '2', '220', '0', '61', '0.25', '48'])
-				csv_file.close()
-
-			return 'test_input_1.csv'
-
-		elif test_num == 2:
-
-			with open('test_input_2.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#sufficient temperature for primary - nothing else
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '100', '0', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_2.csv'
+			#sufficient temperature for primary - nothing else
+			temp_arr = ['', '100', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, temp_arr)
 
 		elif test_num == 3:
 
-			with open('test_input_3.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#sufficient precipitation for primary - nothing else
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '0', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_3.csv'
+			#sufficient precipitation for primary - nothing else
+			prcp_arr = ['', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, prcp_arr)
 
 		elif test_num == 4:
 
-			with open('test_input_4.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#sufficient els for primary - nothing else
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_4.csv'
+			#sufficient els for primary - nothing else
+			els_arr = ['', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, els_arr)
 			
 		elif test_num == 5:
 
-			with open('test_input_5.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#sufficient temperature and precipitation for primary - nothing else
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '100', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_5.csv'
+			#sufficient temperature and precipitation for primary - nothing else
+			temp_and_prcp_arr = ['', '100', '3', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, temp_and_prcp_arr)
 
 		elif test_num == 6:
 
-			with open('test_input_6.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#sufficient temperature and els for primary - nothing else
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '100', '0', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_6.csv'
+			#sufficient temperature and els for primary - nothing else
+			temp_and_els_arr = ['', '100', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, temp_and_els_arr)
 
 		elif test_num == 7:
 
-			with open('test_input_7.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#sufficient precipitation and els for primary - nothing else
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '0', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_7.csv'
+			#sufficient precipitation and els for primary - nothing else
+			prcp_and_els_arr = ['', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, prcp_and_els_arr)
 
 		elif test_num == 8:
 
-			with open('test_input_7.csv', mode='w') as csv_file:
-				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-				#all sufficient primary conditions
-				for d in range(0, 31):
-					d_str = ('0' + str(d)) if (d < 10) else str(d)
-					for h in range(1, 24):
-						h_str = ('0' + str(h)) if (h < 10) else str(h)
-						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
-
-						csv_writer.writerow([t, '100', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
-
-				csv_file.close()
-
-			return 'test_input_7.csv'
+			#all sufficient primary conditions
+			all_sufficient_arr = ['', '100', '3', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, all_sufficient_arr)
 
 if __name__ == '__main__':
 
