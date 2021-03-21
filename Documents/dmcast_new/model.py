@@ -76,6 +76,20 @@ class daily_weather(object):
 	  - 16: infect
 	  - 17: risk level 
 	'''
+
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method initializes the model and reads in data from the NEWA 		 CC
+	CC   dataset.                                      							 CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	CC  List of variables:                                                       CC
+	CC   END_M = ending month of data traversal									 CC
+	CC   END_D = ending day of data traversal                             		 CC 
+	CC   TEST = boolean indicating test mode -> False by default				 CC
+	CC   TEST_METHOD_NUM = if TEST is True, indicates which test case to run 	 CC                                                
+	C*****************************************************************************C
+	'''
 	def __init__(self, end_m, end_d, test=False, test_method_num=0):
 
 		self.print_introduction(test)
@@ -228,8 +242,17 @@ class daily_weather(object):
 		else:
 			print(self.secondary_list)
 
-
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method prints out the introduction for the user.					 CC                                      							 CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	CC  List of variables:                                                       CC
+	CC   TEST = boolean indicating test run or not                               CC                                                 CC
+	C*****************************************************************************C
+	'''
 	def print_introduction(self, test):
+		
 		print ""
 		print("#	-------------------------------------------------	#")
 		print("#	Welcome to the updated version of DMCast!")
@@ -243,8 +266,18 @@ class daily_weather(object):
 		print("#	-------------------------------------------------	#")
 		print ""
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method generates the ELS stages of each day in the dataset based	 CC
+	CC   on information from the cultivars of the plant.                         CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	'''
 	def generate_els(self):
 
+		#CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+		# POTENTIAL FOR CV INTEGRATION OF CANOPY OBSERVATION FROM PROXIMAL DATASTREAM
+		
 		for i in range(len(self.ret_matrix)):
 			if self.ret_matrix[i][2] > 7:
 				dday7 = 1
@@ -265,6 +298,13 @@ class daily_weather(object):
 			els = 13
 			self.ret_matrix[i].append(round(els,2))
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method detects dates for primary infection based on sufficient	 CC
+	CC   temperature, precipitation, and ELS thresholds.                         CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	'''
 	def primary_infection(self):
 
 		#generate els for day and add to matrix
@@ -299,6 +339,13 @@ class daily_weather(object):
 			else:
 				self.ret_matrix[i].append(0)
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method detects dates for primary infection based on hourly		 CC 
+	CC   information of the temperature and a regression model.                  CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	'''
 	def incubation_period(self):
 
 		for i in range(len(self.ret_matrix)):
@@ -330,20 +377,13 @@ class daily_weather(object):
 
 	'''
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-	CC   This subroutine estimates sporulation factor at each hour depending on  CC
+	CC   This method estimates sporulation factor at each hour depending on      CC
 	CC   temperature and relative humidity.                                      CC
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 	C*****************************************************************************C
 	CC  List of variables:                                                       CC
-	CC   ISPRD = Hours of sporulation period: Sporulation starts when conditions CC
-	CC          are favorable at least 4 hours (i.e., ISPD>=4) without any       CC
-	CC          interuption                                                      CC
-	CC   ISTMP = Average temperature during ISPRD                                CC
-	CC   TMPSUM = Sum of hourly temperature during ISPRD                         CC
-	CC   SP = Sporulation factor                                                 CC
+	CC   ARR = input information from NEWA dataset                               CC
 	C*****************************************************************************C
-	CCC==Sporulation occurs only during night (21:00-5:00) and relative humidity
-	CCC==is greater than 90% 
 	'''
 	def sporulation(self, arr):
 		
@@ -377,15 +417,13 @@ class daily_weather(object):
 
 	'''
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-	CC   This subroutine estimates mortality factor of spores and calculates     CC
+	CC   This method estimates mortality factor of spores and calculates         CC
 	CC   survival factor at each hour depending on temperature and relative      CC
 	CC   humidity.                                                               CC
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 	C*****************************************************************************C
 	CC   List of variables:                                                      CC
-	CC    SP = Sporulation factor                                                CC
-	CC    SV = Spore survival factor                                             CC
-	CC    SPMORT = Spore mortality factor                                        CC
+	CC    ARR = input information from NEWA dataset                              CC
 	C*****************************************************************************C
 	'''
 	def survival(self, arr):
@@ -413,22 +451,13 @@ class daily_weather(object):
 	
 	'''
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-	CC   This subroutine identifies favorable environmental conditions for       CC
+	CC   This method identifies favorable environmental conditions for the       CC
 	CC   infection process of the fungus.  Longer than 10 min of wetness period  CC
 	CC   is necessary to make infection.                                         CC
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 	C*****************************************************************************C
 	CC   List of variables:                                                      CC
-	CC    INFECT = Infection factor                                              CC
-	CC    TSUMI = Sum of temperature during infection period                     CC
-	CC    DF = Risk level of disease development                                 CC
-	CC                                                                           CC
-	CC    AVTMPI = Average temperature during the infection period               CC
-	CC    WETPRD = Wetness period in minutes                                     CC
-	CC    NI = Hours of a consecutive wetness period                             CC
-	CC    IDSTRT = Starting date of wetness period                               CC
-	CC    IHSTRT = Starting hour of wetness period                               CC
-	CC    WETSUM = Sum of wetness period during infection period                 CC
+	CC    ARR = input information from NEWA dataset                              CC
 	C*****************************************************************************C
 	'''
 	def infection(self, arr):
@@ -451,6 +480,13 @@ class daily_weather(object):
 			print("greater than 0")
 		return arr
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method calls the sub methods of CYCLE: sporulation, survival, 	 CC
+	CC	 and infection.                                         				 CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	'''
 	def cycle(self):
 
 		self.final_matrix = []
@@ -468,6 +504,15 @@ class daily_weather(object):
 			temp_arr = self.infection(temp_arr)
 			self.final_matrix.append(temp_arr)
 
+	'''
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	CC   This method runs the tests for the model.                               CC
+	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	C*****************************************************************************C
+	CC   List of variables:                                                      CC
+	CC    TEST_NUM = test number to run on 				                         CC
+	C*****************************************************************************C
+	'''
 	def run_test(self, test_num):
 		if test_num == 1:
 
