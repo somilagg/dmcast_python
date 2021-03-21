@@ -90,9 +90,11 @@ class daily_weather(object):
 	CC   TEST_METHOD_NUM = if TEST is True, indicates which test case to run 	 CC                                                
 	C*****************************************************************************C
 	'''
-	def __init__(self, end_m, end_d, test=False, test_method_num=0):
+	def __init__(self, end_m, end_d, test=False, test_method_num=0, els=13):
 
 		self.print_introduction(test)
+
+		self.els = els
 
 		# setting initial cultivars values to Chardonnay
 		self.A = 35.2
@@ -242,6 +244,9 @@ class daily_weather(object):
 		else:
 			print(self.secondary_list)
 
+	def return_lists(self):
+		return self.primary_list, self.secondary_list
+
 	'''
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 	CC   This method prints out the introduction for the user.					 CC                                      							 CC
@@ -291,12 +296,12 @@ class daily_weather(object):
 			k= 0.003
 			m=1.5
 			'''
-			expo = self.B - self.k * dday7
-			pwr = 1 / (1 - self.m)
-			els = self.A * (1 + math.exp(expo)) ** pwr
-			#		35    * 0.03)
-			els = 13
-			self.ret_matrix[i].append(round(els,2))
+			# expo = self.B - self.k * dday7
+			# pwr = 1 / (1 - self.m)
+			# els = self.A * (1 + math.exp(expo)) ** pwr
+			# #		35    * 0.03)
+			# els = 13
+			self.ret_matrix[i].append(round(self.els,2))
 
 	'''
 	CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -529,45 +534,135 @@ class daily_weather(object):
 
 		elif test_num == 2:
 
-			#sufficient temperature for primary - nothing else
-			pass
+			with open('test_input_2.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+				#sufficient temperature for primary - nothing else
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '100', '0', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_2.csv'
 
 		elif test_num == 3:
 
-			#sufficient precipitation for primary - nothing else
-			pass
+			with open('test_input_3.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+				#sufficient precipitation for primary - nothing else
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '0', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_3.csv'
 
 		elif test_num == 4:
 
-			#sufficient els for primary - nothing else
-			pass
+			with open('test_input_4.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
+				#sufficient els for primary - nothing else
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_4.csv'
+			
 		elif test_num == 5:
 
-			#sufficient temperature and precipitation for primary - nothing else
-			pass
+			with open('test_input_5.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+				#sufficient temperature and precipitation for primary - nothing else
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '100', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_5.csv'
 
 		elif test_num == 6:
 
-			#sufficient temperature and els for primary - nothing else
-			pass
+			with open('test_input_6.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+				#sufficient temperature and els for primary - nothing else
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '100', '0', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_6.csv'
 
 		elif test_num == 7:
 
-			#sufficient precipitation and els for primary - nothing else
-			pass
+			with open('test_input_7.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+				#sufficient precipitation and els for primary - nothing else
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '0', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_7.csv'
 
 		elif test_num == 8:
 
-			#all sufficient primary conditions
-			pass
+			with open('test_input_7.csv', mode='w') as csv_file:
+				csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
+				#all sufficient primary conditions
+				for d in range(0, 31):
+					d_str = ('0' + str(d)) if (d < 10) else str(d)
+					for h in range(1, 24):
+						h_str = ('0' + str(h)) if (h < 10) else str(h)
+						t = '07/' + str(d_str) + '/2020 ' + str(h_str) + ':00 EDT'
+
+						csv_writer.writerow([t, '100', '3', '0', '0', '0', '0', '0', '0', '0', '0'])
+
+				csv_file.close()
+
+			return 'test_input_7.csv'
 
 if __name__ == '__main__':
 
 	#return average temperature and precipitation from sep 1st to october 2nd
-	#daily_weather(0, 0, True, 1)
-	daily_weather(8, 2)
+	daily_weather(0, 0, True, 2)
+	#daily_weather(8, 2)
 	print ""
 	print("#	-------------------------------------------------	#")
 	print("#	Successfully completed running model.py")
