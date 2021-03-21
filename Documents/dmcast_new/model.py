@@ -581,13 +581,3 @@ class daily_weather(object):
 			#all sufficient primary conditions
 			all_sufficient_arr = ['', '100', '3', '0', '0', '0', '0', '0', '0', '0', '0']
 			return self.generate_test_dataset(test_num, all_sufficient_arr)
-
-if __name__ == '__main__':
-
-	#return average temperature and precipitation from sep 1st to october 2nd
-	daily_weather(0, 0, True, 2)
-	#daily_weather(8, 2)
-	print ""
-	print("#	-------------------------------------------------	#")
-	print("#	Successfully completed running model.py")
-	print("#	-------------------------------------------------	#")
