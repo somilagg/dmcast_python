@@ -50,7 +50,7 @@ def test_all_sufficient():
     m = run_test_without_output(8, 13)
     primary_list, secondary_list = m.return_lists()
     assert len(primary_list) != 0 and len(secondary_list) != 0
-    print("passed test all sufficient.")
+    print("passed test_all_sufficient.")
 
 def run_primary_tests():
     test_temp()
@@ -62,10 +62,4 @@ def run_primary_tests():
     test_all_sufficient()
 
 if __name__ == "__main__":
-    test_temp()
-    test_prcp()
-    test_els()
-    test_temp_and_prcp()
-    test_temp_and_els()
-    test_prcp_and_els()
-    test_all_sufficient()
+    run_primary_tests()
