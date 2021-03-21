@@ -52,6 +52,19 @@ def test_all_sufficient():
     assert len(primary_list) != 0 and len(secondary_list) != 0
     print("passed test_all_sufficient.")
 
+def test_low_values():
+    m = run_test_without_output(9, 0)
+    primary_list, secondary_list = m.return_lists()
+    assert len(primary_list) == 0 and len(secondary_list) == 0
+    print("passed test_low_values.")
+
+
+def test_high_values():
+    m = run_test_without_output(10, 13)
+    primary_list, secondary_list = m.return_lists()
+    assert len(primary_list) != 0 and len(secondary_list) != 0
+    print("passed test_high_values.")
+
 def run_primary_tests():
     test_temp()
     test_prcp()
@@ -60,6 +73,8 @@ def run_primary_tests():
     test_temp_and_els()
     test_prcp_and_els()
     test_all_sufficient()
+    test_low_values()
+    test_high_values()
 
 if __name__ == "__main__":
     run_primary_tests()

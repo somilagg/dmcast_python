@@ -108,7 +108,7 @@ class daily_weather(object):
 		if test_method_num ==  0:
 			file_name = 'dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv'
 		else:
-			file_name = self.run_test(test_method_num)
+			file_name = self.run_primary_model_isolated_variables_test(test_method_num)
 
 		#read in csv file to list
 		with open(file_name, 'rt') as csv_file:
@@ -538,7 +538,7 @@ class daily_weather(object):
 
 		return file_name
 
-	def run_test(self, test_num):
+	def run_primary_model_isolated_variables_test(self, test_num):
 
 		if test_num == 2:
 
@@ -581,3 +581,15 @@ class daily_weather(object):
 			#all sufficient primary conditions
 			all_sufficient_arr = ['', '100', '3', '0', '0', '0', '0', '0', '0', '0', '0']
 			return self.generate_test_dataset(test_num, all_sufficient_arr)
+
+		elif test_num == 9:
+
+			#realistic all low values
+			low_values_arr = ['', '32', '0', '0', '25', '0', '0', '0', '0', '0', '25']
+			return self.generate_test_dataset(test_num, low_values_arr)
+
+		elif test_num == 10:
+
+			#realistic all high values
+			high_values_arr = ['', '100', '0.75', '60', '100', '20', '81', '0', '0', '0', '80']
+			return self.generate_test_dataset(test_num, high_values_arr)
