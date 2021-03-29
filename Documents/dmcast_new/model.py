@@ -411,6 +411,7 @@ class daily_weather(object):
 					sp = 0.0
 			else:
 				sp = 0.0
+
 		else:
 			sp = 0.0
 			self.isprd = 0
@@ -434,9 +435,8 @@ class daily_weather(object):
 	def survival(self, arr):
 		
 		spmort = 0.0
-
 		if self.sv < arr[11]:
-			sv = arr[11]
+			self.sv = arr[11]
 
 		if arr[6] >= 90.0:
 			if arr[3] <= 25.0:
@@ -482,7 +482,7 @@ class daily_weather(object):
 		arr.append(round(infect,2))
 		arr.append(round(arr[len(arr)-2] * infect * 100,2))
 		if (arr[len(arr)-1] > 0):
-			print("greater than 0")
+			print(arr[len(arr)-1])
 		return arr
 
 	'''
@@ -540,6 +540,12 @@ class daily_weather(object):
 
 	def run_primary_model_isolated_variables_test(self, test_num):
 
+		if test_num == 1:
+
+			#no sufficient conditions
+			temp_arr = ['', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			return self.generate_test_dataset(test_num, temp_arr)
+
 		if test_num == 2:
 
 			#sufficient temperature for primary - nothing else
@@ -593,3 +599,6 @@ class daily_weather(object):
 			#realistic all high values
 			high_values_arr = ['', '100', '0.75', '60', '100', '20', '81', '0', '0', '0', '80']
 			return self.generate_test_dataset(test_num, high_values_arr)
+
+if __name__ == "__main__":
+	daily_weather(8,2)

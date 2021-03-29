@@ -9,6 +9,12 @@ def run_test_without_output(test_num, els):
 
     return m
 
+def test_no_sufficient():
+    m = run_test_without_output(1, 0)
+    primary_list, secondary_list = m.return_lists()
+    assert len(primary_list) == 0 and len(secondary_list) == 0
+    print("passed test_no_sufficient.")
+
 def test_temp():
     m = run_test_without_output(2, 0)
     primary_list, secondary_list = m.return_lists()
