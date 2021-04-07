@@ -481,8 +481,6 @@ class daily_weather(object):
 
 		arr.append(round(infect,2))
 		arr.append(round(arr[len(arr)-2] * infect * 100,2))
-		if (arr[len(arr)-1] > 0):
-			print(arr[len(arr)-1])
 		return arr
 
 	'''
@@ -601,4 +599,4 @@ class daily_weather(object):
 			return self.generate_test_dataset(test_num, high_values_arr)
 
 if __name__ == "__main__":
-	daily_weather(8,2)
+	daily_weather(10,1)
