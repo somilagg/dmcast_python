@@ -1,5 +1,7 @@
 import math
 import csv
+import requests
+import json
 
 class daily_weather(object):
 
@@ -90,7 +92,7 @@ class daily_weather(object):
 	CC   TEST_METHOD_NUM = if TEST is True, indicates which test case to run 	 CC                                                
 	C*****************************************************************************C
 	'''
-	def __init__(self, end_m, end_d, test=False, test_method_num=0, els=13):
+	def __init__(self, end_m, end_d, test=False, test_method_num=0, els=13, api=False):
 
 		self.print_introduction(test)
 
@@ -102,113 +104,180 @@ class daily_weather(object):
 		self.k = 0.0029
 		self.m = 1.438
 
-		#array of number of days in month
+		# array of number of days in month
 		self.months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-		if test_method_num ==  0:
-			file_name = 'dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv'
-		else:
-			file_name = self.run_primary_model_isolated_variables_test(test_method_num)
-
-		#read in csv file to list
-		with open(file_name, 'rt') as csv_file:
-			reader = csv.reader(csv_file)
-			inp = list(reader)
-			inp.reverse()
-		
-		#initalizing variables
-		curr_m = 7
-		curr_d = 1
-		index = 0
+		# matrix storing input values 
 		self.ret_matrix = []
 		self.ret_matrix_total = []
 		self.main_matrix = []
 
-		#goes until the end date is reached
-		while (end_m != curr_m or end_d != curr_d) and index < len(inp):
-
-			#increase month if day limit is exceeded
-			if curr_d > self.months[curr_m-1]:
-				curr_m += 1
-				curr_d = 1
-
-			#starting information from csv file
-			s = inp[index][0]
-			curr_m = int(s[0:2])
-			curr_d = int(s[3:5])
-
-			#initializing variables
-			total_temp = 0
-			total_prcp = 0
-			ret_arr = []
-			orig_m = curr_m
-			orig_d = curr_d
-
-			#continue until next date is reached
-			while orig_m == curr_m and orig_d == curr_d and index < len(inp):
+		if api:
+			sid = "ny_genm nwon"
+			# YYYYMMDDHH
+			sdate = "2020070100"
+			edate = "2020070500"
+			data = {
+				"sid":sid,
+				"sdate":sdate,
+				"edate":edate
+				}
+			resp = requests.post('https://hrly.nrcc.cornell.edu/stnHrly', json=data)
+			j = resp.json()
+			j_mat = []
+			for h in j['hrlyData']:
+				for e in range(len(h)):
+					h[e] = str(h[e])
+				j_mat.append(h)
+			
+			#2020-07-01T00:00:00-04:00
+			#[u'date', u'flags', u'prcp', u'temp', u'rhum', u'dwpt', u'lwet', u'wspd', u'wdir', u'srad']
+			day_temp = 0
+			day_prcp = 0
+			for r in j_mat:
+				ret_arr = []
 				ret_arr_total = []
-				main_matrix_arr = []
+				ret_arr.append(int(r[0][5:7]))
+				ret_arr_total.append(int(r[0][5:7]))
+				ret_arr.append(int(r[0][8:10]))
+				ret_arr_total.append(int(r[0][8:10]))
+				ret_arr.append(int(r[0][11:13]))
+				ret_arr_total.append(int(r[0][11:13]))
 
-				#add to total trackers
-				total_temp += float(inp[index][1])
-				total_prcp += float(inp[index][2]) * 25.4
+				day_temp += round(float(r[3]), 2)
+				tempC = 5.0/9.0 * (float(r[3]) - 32)
+				ret_arr.append(round(tempC,2))
+				ret_arr_total.append(round(tempC, 2))
 
-				#to add to ret_matrix
-				ret_arr_total.append(curr_m)
-				ret_arr_total.append(curr_d)
-				ret_arr_total.append(int(s[11:13]))
-				temp_C = 5.0/9.0 * (float(inp[index][1]) - 32)
-				ret_arr_total.append(round(temp_C,2))
-				ret_arr_total.append(float(inp[index][2]) * 25.4)
+				day_prcp += round(float(r[2]) * 25.4, 2)
+				ret_arr.append(round(float(r[2]) * 25.4, 2))
+				ret_arr_total.append(round(float(r[2]) * 25.4, 2))
+				ret_arr.append(float(r[6]))
+				ret_arr.append(float(r[4]))
+				ret_arr.append(float(r[7]))
+				ret_arr.append(float(r[8]))
+				ret_arr.append(r[9])
 
-				#to add to main_matrix
-				main_matrix_arr.append(curr_m)
-				main_matrix_arr.append(curr_d)
-				main_matrix_arr.append(int(s[11:13]))
-				main_matrix_arr.append(round(temp_C,2))
-
-				try: main_matrix_arr.append(float(inp[index][2]) * 25.4)
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][3]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][4]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][5]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][6]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][7]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][8]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][9]))
-				except: main_matrix_arr.append(0.0)
-				try: main_matrix_arr.append(float(inp[index][10]))
-				except: main_matrix_arr.append(0.0)
-
-				#add to the matrices
-				self.main_matrix.append(main_matrix_arr)
+				self.main_matrix.append(ret_arr)
 				self.ret_matrix_total.append(ret_arr_total)
 
-				#iterate and get values of next row
+				ret_arr_daily = []
+				if float(r[0][11:13]) == 23.0:
+					day_temp /= 24.0
+					day_temp = 5.0/9.0 * (day_temp - 32)
+					ret_arr_daily.append(int(r[0][5:7]))
+					ret_arr_daily.append(int(r[0][8:10]))
+					ret_arr_daily.append(round(day_temp, 2))
+					ret_arr_daily.append(round(day_prcp, 2))
+
+					day_temp = 0
+					day_prcp = 0
+					self.ret_matrix.append(ret_arr_daily)
+
+				#since soil temp, soil moisture, and dewpoint are not used currently - they have not been added to self.matrix in api calls
+			
+		else:
+			if test_method_num ==  0:
+				file_name = 'dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv'
+			else:
+				file_name = self.run_primary_model_isolated_variables_test(test_method_num)
+
+			#read in csv file to list
+			with open(file_name, 'rt') as csv_file:
+				reader = csv.reader(csv_file)
+				inp = list(reader)
+				inp.reverse()
+			
+			#initalizing variables
+			curr_m = 7
+			curr_d = 1
+			index = 0
+
+			#goes until the end date is reached
+			while (end_m != curr_m or end_d != curr_d) and index < len(inp):
+
+				#increase month if day limit is exceeded
+				if curr_d > self.months[curr_m-1]:
+					curr_m += 1
+					curr_d = 1
+
+				#starting information from csv file
+				s = inp[index][0]
+				curr_m = int(s[0:2])
+				curr_d = int(s[3:5])
+
+				#initializing variables
+				total_temp = 0
+				total_prcp = 0
+				ret_arr = []
+				orig_m = curr_m
+				orig_d = curr_d
+
+				#continue until next date is reached
+				while orig_m == curr_m and orig_d == curr_d and index < len(inp):
+					ret_arr_total = []
+					main_matrix_arr = []
+
+					#add to total trackers
+					total_temp += float(inp[index][1])
+					total_prcp += float(inp[index][2]) * 25.4
+
+					#to add to ret_matrix
+					ret_arr_total.append(curr_m)
+					ret_arr_total.append(curr_d)
+					ret_arr_total.append(int(s[11:13]))
+					temp_C = 5.0/9.0 * (float(inp[index][1]) - 32)
+					ret_arr_total.append(round(temp_C,2))
+					ret_arr_total.append(float(inp[index][2]) * 25.4)
+
+					#to add to main_matrix
+					main_matrix_arr.append(curr_m)
+					main_matrix_arr.append(curr_d)
+					main_matrix_arr.append(int(s[11:13]))
+					main_matrix_arr.append(round(temp_C,2))
+
+					try: main_matrix_arr.append(float(inp[index][2]) * 25.4)
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][3]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][4]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][5]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][6]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][7]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][8]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][9]))
+					except: main_matrix_arr.append(0.0)
+					try: main_matrix_arr.append(float(inp[index][10]))
+					except: main_matrix_arr.append(0.0)
+
+					#add to the matrices
+					self.main_matrix.append(main_matrix_arr)
+					self.ret_matrix_total.append(ret_arr_total)
+
+					#iterate and get values of next row
+					index += 1
+					if(index < len(inp)):
+						s = inp[index][0]
+						curr_m = int(s[0:2])
+						curr_d = int(s[3:5])
+
+
+				#append month, day, total temperature, and total precipitation to array
+				ret_arr.append(curr_m)
+				ret_arr.append(curr_d)
+				avgF = total_temp/24.0
+				avgC = 5.0/9.0 * (avgF - 32)
+				ret_arr.append(round(avgC,2))
+				ret_arr.append(round(total_prcp,2))
+
+				#append to 2d matrix of return values
+				self.ret_matrix.append(ret_arr)
 				index += 1
-				if(index < len(inp)):
-					s = inp[index][0]
-					curr_m = int(s[0:2])
-					curr_d = int(s[3:5])
-
-
-			#append month, day, total temperature, and total precipitation to array
-			ret_arr.append(curr_m)
-			ret_arr.append(curr_d)
-			avgF = total_temp/24.0
-			avgC = 5.0/9.0 * (avgF - 32)
-			ret_arr.append(round(avgC,2))
-			ret_arr.append(round(total_prcp,2))
-
-			#append to 2d matrix of return values
-			self.ret_matrix.append(ret_arr)
-			index += 1
 
 		self.primary_infection()
 
@@ -433,10 +502,9 @@ class daily_weather(object):
 	C*****************************************************************************C
 	'''
 	def survival(self, arr):
-		
 		spmort = 0.0
-		if self.sv < arr[11]:
-			self.sv = arr[11]
+		if self.sv < arr[-1]:
+			self.sv = arr[-1]
 
 		if arr[6] >= 90.0:
 			if arr[3] <= 25.0:
@@ -599,4 +667,4 @@ class daily_weather(object):
 			return self.generate_test_dataset(test_num, high_values_arr)
 
 if __name__ == "__main__":
-	daily_weather(10,1)
+	daily_weather(10,1,api=True)

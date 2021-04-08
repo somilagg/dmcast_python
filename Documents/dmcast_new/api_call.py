@@ -3,8 +3,8 @@ import json
 
 sid = "ny_genm nwon"
 # YYYYMMDDHH
-sdate = "2021010100"
-edate = "2021010300"
+sdate = "2020070100"
+edate = "2020070500"
 data = {
     "sid":sid,
     "sdate":sdate,
@@ -18,7 +18,7 @@ for h in j['hrlyData']:
     for e in range(len(h)):
         h[e] = str(h[e])
     j_mat.append(h)
-    print h
+    print h[0][0:1]
 
 #print(j_mat)
 
