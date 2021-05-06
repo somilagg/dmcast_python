@@ -178,7 +178,7 @@ class daily_weather(object):
 			
 		else:
 			if test_method_num ==  0:
-				file_name = 'dmcast-sample-dataset-mccarthyFarm-20200701-20200931.csv'
+				file_name = 'modified_1985.csv'
 			else:
 				file_name = self.run_primary_model_isolated_variables_test(test_method_num)
 
@@ -667,4 +667,4 @@ class daily_weather(object):
 			return self.generate_test_dataset(test_num, high_values_arr)
 
 if __name__ == "__main__":
-	daily_weather(10,1,api=True)
+	daily_weather(6,2)
